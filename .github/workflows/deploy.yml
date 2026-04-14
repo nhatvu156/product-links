@@ -23,19 +23,17 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: modern-product-links-hub/package-lock.json
+          cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm install
-        working-directory: modern-product-links-hub
       - name: Build
         run: npm run build
-        working-directory: modern-product-links-hub
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './modern-product-links-hub/dist'
+          path: './dist'
 
   deploy:
     environment:
