@@ -42,12 +42,7 @@ function App() {
     setIsLoading(true);
     try {
       // Gọi API GAS (mặc định trình duyệt sẽ follow redirect)
-      const response = await fetch(API_URL, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
+      const response = await fetch(API_URL);
       const data = await response.json();
 
       // Chuyển đổi dữ liệu từ Google Sheet sang format của App
