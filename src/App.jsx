@@ -41,8 +41,13 @@ function App() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      // Vì fetch từ Google Script thường bị redirect, chúng ta có thể dùng fetch trực tiếp nếu Anyone có quyền
-      const response = await fetch(API_URL);
+      // Gọi API GAS (mặc định trình duyệt sẽ follow redirect)
+      const response = await fetch(API_URL, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
       const data = await response.json();
 
       // Chuyển đổi dữ liệu từ Google Sheet sang format của App
