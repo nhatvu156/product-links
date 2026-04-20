@@ -8,8 +8,9 @@ export function AddLinkModal({ isOpen, onClose, onAdd }) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Tech');
+  const [category, setCategory] = useState('Công nghệ');
   const [tagsInput, setTagsInput] = useState('');
+  const [image, setImage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ export function AddLinkModal({ isOpen, onClose, onAdd }) {
       toast.error('Vui lòng nhập Tên và URL.');
       return;
     }
-    
+
     // Process tags
     const tagsArray = tagsInput
       .split(',')
@@ -29,17 +30,19 @@ export function AddLinkModal({ isOpen, onClose, onAdd }) {
       title,
       url,
       description,
+      image,
       category,
       tags: tagsArray,
       createdAt: new Date().toISOString(),
     });
-    
+
     toast.success('Đã thêm liên kết thành công!');
     setTitle('');
     setUrl('');
     setDescription('');
     setCategory('Công nghệ');
     setTagsInput('');
+    setImage('');
     onClose();
   };
 
@@ -86,7 +89,7 @@ export function AddLinkModal({ isOpen, onClose, onAdd }) {
                     placeholder="VD: Bàn phím Magic Keyboard"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-[13px] font-medium text-[#86868b] dark:text-[#a1a1a6] mb-1.5 uppercase tracking-wider">
                     Đường Dẫn (URL) *
@@ -100,7 +103,20 @@ export function AddLinkModal({ isOpen, onClose, onAdd }) {
                     placeholder="https://..."
                   />
                 </div>
-                
+
+                <div>
+                  <label className="block text-[13px] font-medium text-[#86868b] dark:text-[#a1a1a6] mb-1.5 uppercase tracking-wider">
+                    Link Ảnh Sản Phẩm (Tùy chọn)
+                  </label>
+                  <input
+                    type="url"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    className="w-full px-4 py-3 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.05] rounded-xl focus:bg-white dark:focus:bg-[#1d1d1f] focus:outline-none focus:border-[#1d1d1f] dark:focus:border-white transition-all text-[15px] text-[#1d1d1f] dark:text-white"
+                    placeholder="https://...image.jpg"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[13px] font-medium text-[#86868b] dark:text-[#a1a1a6] mb-1.5 uppercase tracking-wider">

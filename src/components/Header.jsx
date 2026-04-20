@@ -20,11 +20,8 @@ export function Header({ searchQuery, setSearchQuery, isDark, toggleDark }) {
           </div>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white transition-colors duration-300">
-              Sản Phẩm Yêu Thích
+              Product Link
             </h1>
-            <p className="text-[#86868b] dark:text-[#a1a1a6] mt-2 max-w-md mx-auto text-sm font-medium">
-              Danh sách tổng hợp các công cụ và phụ kiện mình tin dùng nhất.
-            </p>
           </div>
         </div>
 

@@ -11,11 +11,15 @@ import { ProductCard } from './components/ProductCard';
 import { AddLinkModal } from './components/AddLinkModal';
 import { FloatingActionButton } from './components/FloatingActionButton';
 
+// THAY THẾ LINK NÀY BẰNG WEB APP URL CỦA BẠN SAU KHI DEPLOY GOOGLE APPS SCRIPT
+const API_URL = "https://script.google.com/macros/s/AKfycbxcO-jVNUFvs-SuyTDrvwDYSZ745ALo1oKijGzgfg-LMdsTZhJV0VCb_vsROmDDp4EInQ/exec";
+
 function App() {
-  const [products, setProducts] = useLocalStorage('product_links', initialProducts);
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'az'
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDark, setIsDark] = useLocalStorage('dark_mode', false);
 
@@ -30,12 +34,82 @@ function App() {
 
   const toggleDark = () => setIsDark(!isDark);
 
-  const handleAddProduct = (newProduct) => {
-    setProducts((prev) => [newProduct, ...prev]);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      // Vì fetch từ Google Script thường bị redirect, chúng ta có thể dùng fetch trực tiếp nếu Anyone có quyền
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      // Chuyển đổi dữ liệu từ Google Sheet sang format của App
+      const formattedData = data.map(item => ({
+        id: item.id || Math.random().toString(),
+        title: item.name || item.title,
+        url: item.link || item.url,
+        description: item.description || '',
+        image: item.image || '',
+        category: item.category || 'Khác',
+        tags: item.tags ? item.tags.split('|').map(t => t.trim()) : [],
+        createdAt: item.createdAt || new Date().toISOString()
+      }));
+
+      setProducts(formattedData);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+      // Nếu API lỗi thì dùng initial thay thế để web ko trắng xóa
+      setProducts(initialProducts);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteProduct = (id) => {
-    setProducts((prev) => prev.filter(p => p.id !== id));
+  const handleAddProduct = async (newProduct) => {
+    try {
+      setProducts((prev) => [newProduct, ...prev]);
+
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Cần thiết khi gọi GAS từ domain khác
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add',
+          data: {
+            name: newProduct.title,
+            link: newProduct.url,
+            image: newProduct.image || '',
+            category: newProduct.category,
+            tags: newProduct.tags.join('|')
+          }
+        })
+      });
+      // Vì no-cors không trả về body, chúng ta coi như thành công hoặc fetch lại sau 1s
+      setTimeout(fetchProducts, 1000);
+    } catch (error) {
+      console.error("Lỗi khi lưu sản phẩm:", error);
+    }
+  };
+
+  const handleDeleteProduct = async (id, title) => {
+    try {
+      setProducts((prev) => prev.filter(p => p.id !== id));
+
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          name: title
+        })
+      });
+      setTimeout(fetchProducts, 1000);
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+    }
   };
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -45,9 +119,9 @@ function App() {
         const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-        
+
         const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-        
+
         return matchesSearch && matchesCategory;
       }
     );
@@ -67,7 +141,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] dark:bg-black font-sans transition-colors duration-300">
-      <Toaster 
+      <Toaster
         position="top-center"
         toastOptions={{
           className: 'dark:bg-[#1d1d1f] dark:text-white dark:border dark:border-white/10',
@@ -77,14 +151,14 @@ function App() {
             fontWeight: '500',
             padding: '12px 20px',
           },
-        }} 
+        }}
       />
 
-      <Header 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-        isDark={isDark} 
-        toggleDark={toggleDark} 
+      <Header
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isDark={isDark}
+        toggleDark={toggleDark}
       />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 pb-32">
@@ -94,43 +168,30 @@ function App() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                selectedCategory === cat
-                  ? 'bg-[#1d1d1f] text-white dark:bg-white dark:text-black'
-                  : 'bg-black/[0.04] text-[#86868b] hover:bg-black/[0.08] dark:bg-white/[0.08] dark:text-[#a1a1a6] dark:hover:bg-white/[0.12]'
-              }`}
+              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === cat
+                ? 'bg-[#1d1d1f] text-white dark:bg-white dark:text-black'
+                : 'bg-black/[0.04] text-[#86868b] hover:bg-black/[0.08] dark:bg-white/[0.08] dark:text-[#a1a1a6] dark:hover:bg-white/[0.12]'
+                }`}
             >
               {cat}
             </button>
           ))}
         </div>
 
-        {/* Toolbar */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-[13px] font-semibold text-[#86868b] dark:text-[#a1a1a6] uppercase tracking-wider">
-            {filteredAndSortedProducts.length} Mục
-          </div>
-          <div className="flex items-center gap-3">
-            <Filter size={14} className="text-[#86868b] dark:text-[#a1a1a6]" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-[13px] font-semibold text-[#1d1d1f] dark:text-white cursor-pointer focus:outline-none uppercase tracking-wider"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="az">Tên A-Z</option>
-            </select>
-          </div>
-        </div>
 
         {/* Product List */}
         <motion.div layout className="flex flex-col gap-2">
           <AnimatePresence mode="popLayout">
-            {filteredAndSortedProducts.length > 0 ? (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-4">
+                <div className="w-8 h-8 border-4 border-[#1d1d1f]/10 dark:border-white/10 border-t-[#1d1d1f] dark:border-t-white rounded-full animate-spin"></div>
+                <p className="text-[#86868b] dark:text-[#a1a1a6] text-sm font-medium">Đang tải dữ liệu...</p>
+              </div>
+            ) : filteredAndSortedProducts.length > 0 ? (
               filteredAndSortedProducts.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
+                <ProductCard
+                  key={product.id}
+                  product={product}
                   onDelete={handleDeleteProduct}
                 />
               ))

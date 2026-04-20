@@ -41,7 +41,7 @@ export function ProductCard({ product, onDelete }) {
       {/* Background Actions (Revealed on Swipe) */}
       <div className="absolute inset-0 flex items-center justify-end rounded-[20px] bg-red-500/10 dark:bg-red-500/20 pr-5">
         <button
-          onClick={() => onDelete(product.id)}
+          onClick={() => onDelete(product.id, product.title)}
           className="text-red-500 hover:text-red-600 transition-colors p-2"
           aria-label="Delete"
         >
@@ -61,6 +61,16 @@ export function ProductCard({ product, onDelete }) {
       >
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1 min-w-0">
+            {product.image && (
+              <div className="mb-4 rounded-xl overflow-hidden aspect-video bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.05] dark:border-white/[0.05]">
+                <img
+                  src={product.image}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              </div>
+            )}
             <h3 className="text-[17px] font-semibold text-[#1d1d1f] dark:text-white leading-snug">
               {product.title}
             </h3>
@@ -69,7 +79,7 @@ export function ProductCard({ product, onDelete }) {
                 {product.description}
               </p>
             )}
-            
+
             {/* Tags area */}
             {product.tags && product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
