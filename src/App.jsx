@@ -167,21 +167,6 @@ function App() {
       />
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-10 pb-32">
-        {/* Categories Horizontal Scroll */}
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {AVAILABLE_CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${selectedCategory === cat
-                ? 'bg-[#1d1d1f] text-white dark:bg-white dark:text-black'
-                : 'bg-black/[0.04] text-[#86868b] hover:bg-black/[0.08] dark:bg-white/[0.08] dark:text-[#a1a1a6] dark:hover:bg-white/[0.12]'
-                }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
 
 
         {/* Product List */}
