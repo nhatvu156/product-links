@@ -12,7 +12,7 @@ import { AddLinkModal } from './components/AddLinkModal';
 import { FloatingActionButton } from './components/FloatingActionButton';
 
 // THAY THẾ LINK NÀY BẰNG WEB APP URL CỦA BẠN SAU KHI DEPLOY GOOGLE APPS SCRIPT
-const API_URL = "https://script.google.com/macros/s/AKfycbxcO-jVNUFvs-SuyTDrvwDYSZ745ALo1oKijGzgfg-LMdsTZhJV0VCb_vsROmDDp4EInQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwvLLdN8DAyi0eiZ57yNnN5RnbMIpLtUe6zh9uSD7blo0O76px5SmYZan4HV-agojzRGQ/exec";
 
 function App() {
   const [products, setProducts] = useState([]);
