@@ -125,9 +125,7 @@ function App() {
           product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-        const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
       }
     );
 
